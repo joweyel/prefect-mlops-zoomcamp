@@ -142,7 +142,7 @@ def main_flow_s3(
     mlflow.set_experiment("nyc-taxi-experiment")
 
     # Load
-    s3_bucket_block = S3Bucket.load("s3-bucket-block")
+    s3_bucket_block = S3Bucket.load("s3-bucket-example")
     s3_bucket_block.download_folder_to_path(from_folder="data", to_folder="data")
 
     df_train = read_data(train_path)
@@ -156,4 +156,7 @@ def main_flow_s3(
 
 
 if __name__ == "__main__":
-    main_flow_s3()
+    train_path: str = "./data/green_tripdata_2023-01.parquet"
+    val_path: str = "./data/green_tripdata_2023-02.parquet"
+
+    main_flow_s3(train_path, val_path)

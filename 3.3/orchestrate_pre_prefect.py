@@ -128,4 +128,7 @@ def main_flow(
 
 
 if __name__ == "__main__":
-    main_flow()
+    # Updated file names for 2023
+    train_path: str = "./data/green_tripdata_2023-01.parquet"
+    val_path: str = "./data/green_tripdata_2023-02.parquet"
+    main_flow(train_path, val_path)
