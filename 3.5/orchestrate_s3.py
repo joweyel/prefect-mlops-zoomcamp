@@ -130,10 +130,12 @@ def train_best_model(
     return None
 
 
-@flow
+# Previously:
+# train_path: str = "./data/green_tripdata_2021-01.parquet"
+# val_path: str = "./data/green_tripdata_2021-02.parquet"
 def main_flow_s3(
-    train_path: str = "./data/green_tripdata_2021-01.parquet",
-    val_path: str = "./data/green_tripdata_2021-02.parquet",
+    train_path: str = "./data/green_tripdata_2023-01.parquet",
+    val_path: str = "./data/green_tripdata_2023-02.parquet",
 ) -> None:
     """The main training pipeline"""
 
@@ -157,6 +159,6 @@ def main_flow_s3(
 
 if __name__ == "__main__":
     train_path: str = "./data/green_tripdata_2023-01.parquet"
-    val_path: str = "./data/green_tripdata_2023-02.parquet"
+    val_path: str =   "./data/green_tripdata_2023-02.parquet"
 
     main_flow_s3(train_path, val_path)

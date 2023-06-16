@@ -109,10 +109,13 @@ def train_best_model(
     return None
 
 
+# Previously:
+# train_path: str = "./data/green_tripdata_2021-01.parquet"
+# val_path: str = "./data/green_tripdata_2021-02.parquet"
 @flow
 def main_flow(
-    train_path: str = "./data/green_tripdata_2021-01.parquet",
-    val_path: str = "./data/green_tripdata_2021-02.parquet",
+    train_path: str = "./data/green_tripdata_2023-01.parquet",
+    val_path: str = "./data/green_tripdata_2023-02.parquet",
 ) -> None:
     """The main training pipeline"""
 

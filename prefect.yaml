@@ -13,6 +13,6 @@ push: null
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
 - prefect.projects.steps.git_clone_project:
-    repository: https://github.com/discdiver/prefect-mlops-zoomcamp.git
+    repository: https://github.com/joweyel/prefect-mlops-zoomcamp.git
     branch: main
     access_token: null
