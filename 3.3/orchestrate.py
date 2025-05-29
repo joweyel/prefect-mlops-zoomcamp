@@ -9,6 +9,7 @@ from sklearn.metrics import mean_squared_error
 import mlflow
 import xgboost as xgb
 from prefect import flow, task
+from typing import Tuple
 
 
 @task(retries=3, retry_delay_seconds=2)
@@ -33,15 +34,13 @@ def read_data(filename: str) -> pd.DataFrame:
 @task
 def add_features(
     df_train: pd.DataFrame, df_val: pd.DataFrame
-) -> tuple(
-    [
+) -> Tuple[
         scipy.sparse._csr.csr_matrix,
         scipy.sparse._csr.csr_matrix,
         np.ndarray,
         np.ndarray,
         sklearn.feature_extraction.DictVectorizer,
-    ]
-):
+]:
     """Add features to the model"""
     df_train["PU_DO"] = df_train["PULocationID"] + "_" + df_train["DOLocationID"]
     df_val["PU_DO"] = df_val["PULocationID"] + "_" + df_val["DOLocationID"]
@@ -97,7 +96,7 @@ def train_best_model(
         )
 
         y_pred = booster.predict(valid)
-        rmse = mean_squared_error(y_val, y_pred, squared=False)
+        rmse = np.sqrt(mean_squared_error(y_val, y_pred))
         mlflow.log_metric("rmse", rmse)
 
         pathlib.Path("models").mkdir(exist_ok=True)
@@ -132,7 +131,7 @@ def main_flow(
 
 
 if __name__ == "__main__":
-    # Updated file names for 2023
+    # Updated file names
     train_path: str = "./data/green_tripdata_2023-01.parquet"
     val_path: str = "./data/green_tripdata_2023-02.parquet"
     main_flow(train_path, val_path)

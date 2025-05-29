@@ -1,8 +1,10 @@
-# File for configuring project / deployment build, push and pull steps
+# Welcome to your prefect.yaml file! You can use this file for storing and managing
+# configuration for deploying your flows. We recommend committing this file to source
+# control along with your flow code.
 
 # Generic metadata about this project
-name: zoom_mlops
-prefect-version: 2.10.8
+name: prefect-mlops-zoomcamp
+prefect-version: 3.4.3
 
 # build section allows you to manage and build docker images
 build: null
@@ -12,7 +14,20 @@ push: null
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
-- prefect.projects.steps.git_clone_project:
-    repository: https://github.com/joweyel/prefect-mlops-zoomcamp.git
-    branch: main
-    access_token: null
+- prefect.deployments.steps.set_working_directory:
+    directory: /home/user/GITs/Zoomcamps/MLOps/mlops-material-25/3-Orchestration/prefect-mlops-zoomcamp
+
+# the deployments section allows you to provide configuration for deploying flows
+deployments:
+- name: taxi_local_data
+  version: null
+  tags: []
+  concurrency_limit: null
+  description: The main training pipeline
+  entrypoint: 3.4/orchestrate.py:main_flow
+  parameters: {}
+  work_pool:
+    name: zoompool
+    work_queue_name: null
+    job_variables: {}
+  schedules: []
