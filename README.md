@@ -17,7 +17,12 @@ Clone the repo locally.
 In a conda environment with Python 3.10.12 or similar, install all package dependencies with 
 
 ```bash
-pip install -r requirements.txt
+# Either Prefect 2 ...
+pip install -r requirements_prefect2.txt
+
+# ... or Prefect 3
+pip install -r requirements_prefect3.txt
+
 ```
 ## Start the Prefect server locally
 
