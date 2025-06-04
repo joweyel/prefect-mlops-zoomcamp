@@ -14,15 +14,15 @@ Clone the repo locally.
 
 ## Install packages
 
-In a conda environment with Python 3.10.12 or similar, install all package dependencies with 
-
+Create a conda environment:
 ```bash
-# Either Prefect 2 ...
-pip install -r requirements_prefect2.txt
+conda create -n prefect-ops3 python=3.11 pip
+conda activate prefect-ops3
+```
 
-# ... or Prefect 3
-pip install -r requirements_prefect3.txt
-
+In the conda environment, install all package dependencies with:
+```bash
+pip install -r requirements.txt
 ```
 ## Start the Prefect server locally
 
@@ -31,8 +31,6 @@ Create another window and activate your conda environment. Start the Prefect API
 ```bash
 prefect server start
 ```
-
-
 
 ## Optional: use Prefect Cloud for added capabilties
 Signup and use for free at https://app.prefect.cloud
