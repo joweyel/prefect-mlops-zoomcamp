@@ -7,11 +7,13 @@ import sklearn
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import mean_squared_error
 import mlflow
+from mlflow.models import infer_signature
 import xgboost as xgb
 from prefect import flow, task
-from prefect_aws import S3Bucket
+from prefect_aws import S3Bucket, AwsCredentials
 from prefect.artifacts import create_markdown_artifact
 from datetime import date
+from typing import Tuple
 
 
 @task(retries=3, retry_delay_seconds=2)
@@ -36,15 +38,13 @@ def read_data(filename: str) -> pd.DataFrame:
 @task
 def add_features(
     df_train: pd.DataFrame, df_val: pd.DataFrame
-) -> tuple(
-    [
+) -> Tuple[
         scipy.sparse._csr.csr_matrix,
         scipy.sparse._csr.csr_matrix,
         np.ndarray,
         np.ndarray,
         sklearn.feature_extraction.DictVectorizer,
-    ]
-):
+]:
     """Add features to the model"""
     df_train["PU_DO"] = df_train["PULocationID"] + "_" + df_train["DOLocationID"]
     df_val["PU_DO"] = df_val["PULocationID"] + "_" + df_val["DOLocationID"]
@@ -83,7 +83,7 @@ def train_best_model(
             "learning_rate": 0.09585355369315604,
             "max_depth": 30,
             "min_child_weight": 1.060597050922164,
-            "objective": "reg:linear",
+            "objective": "reg:squarederror",
             "reg_alpha": 0.018060244040060163,
             "reg_lambda": 0.011658731377413597,
             "seed": 42,
@@ -100,7 +100,7 @@ def train_best_model(
         )
 
         y_pred = booster.predict(valid)
-        rmse = mean_squared_error(y_val, y_pred, squared=False)
+        rmse = np.sqrt(mean_squared_error(y_val, y_pred))
         mlflow.log_metric("rmse", rmse)
 
         pathlib.Path("models").mkdir(exist_ok=True)
@@ -109,6 +109,9 @@ def train_best_model(
         mlflow.log_artifact("models/preprocessor.b", artifact_path="preprocessor")
 
         mlflow.xgboost.log_model(booster, artifact_path="models_mlflow")
+        # Infer signature using raw input features (before DMatrix conversion)
+        signature = infer_signature(X_val.toarray(), y_val)
+        mlflow.xgboost.log_model(booster, artifact_path="models_mlflow", signature=signature)
 
         markdown__rmse_report = f"""# RMSE Report
 
@@ -129,10 +132,6 @@ def train_best_model(
 
     return None
 
-
-# Previously:
-# train_path: str = "./data/green_tripdata_2021-01.parquet"
-# val_path: str = "./data/green_tripdata_2021-02.parquet"
 def main_flow_s3(
     train_path: str = "./data/green_tripdata_2023-01.parquet",
     val_path: str = "./data/green_tripdata_2023-02.parquet",

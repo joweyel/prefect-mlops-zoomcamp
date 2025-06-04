@@ -7,6 +7,7 @@ import sklearn
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import mean_squared_error
 import mlflow
+from mlflow.models import infer_signature
 import xgboost as xgb
 from prefect import flow, task
 from typing import Tuple
@@ -76,7 +77,7 @@ def train_best_model(
             "learning_rate": 0.09585355369315604,
             "max_depth": 30,
             "min_child_weight": 1.060597050922164,
-            "objective": "reg:linear",
+            "objective": "reg:squarederror",
             "reg_alpha": 0.018060244040060163,
             "reg_lambda": 0.011658731377413597,
             "seed": 42,
@@ -101,7 +102,9 @@ def train_best_model(
             pickle.dump(dv, f_out)
         mlflow.log_artifact("models/preprocessor.b", artifact_path="preprocessor")
 
-        mlflow.xgboost.log_model(booster, artifact_path="models_mlflow")
+        # Infer signature using raw input features (before DMatrix conversion)
+        signature = infer_signature(X_val.toarray(), y_val)
+        mlflow.xgboost.log_model(booster, artifact_path="models_mlflow", signature=signature)
     return None
 
 

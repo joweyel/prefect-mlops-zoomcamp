@@ -19,6 +19,7 @@ def animal_facts():
     cat_fact = fetch_cat_fact()
     dog_fact = fetch_dog_fact()
     print(f"🐱: {cat_fact} \n🐶: {dog_fact}")
+    return { "cat": cat_fact, "dog": dog_fact }
 
 if __name__ == "__main__":
-    animal_facts()
+    facts = animal_facts()

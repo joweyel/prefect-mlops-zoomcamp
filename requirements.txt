@@ -1,4 +1,4 @@
-prefect==3.4.3
+prefect==3.4.4
 prefect-aws==0.5.10
 black==25.1.0
 fastparquet==2024.11.0

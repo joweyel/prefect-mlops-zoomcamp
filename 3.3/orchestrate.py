@@ -7,6 +7,7 @@ import sklearn
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.metrics import mean_squared_error
 import mlflow
+from mlflow.models import infer_signature
 import xgboost as xgb
 from prefect import flow, task
 from typing import Tuple
@@ -32,14 +33,12 @@ def read_data(filename: str) -> pd.DataFrame:
 
 
 @task
-def add_features(
-    df_train: pd.DataFrame, df_val: pd.DataFrame
-) -> Tuple[
-        scipy.sparse._csr.csr_matrix,
-        scipy.sparse._csr.csr_matrix,
-        np.ndarray,
-        np.ndarray,
-        sklearn.feature_extraction.DictVectorizer,
+def add_features(df_train: pd.DataFrame, df_val: pd.DataFrame) -> Tuple[
+    scipy.sparse._csr.csr_matrix,
+    scipy.sparse._csr.csr_matrix,
+    np.ndarray,
+    np.ndarray,
+    sklearn.feature_extraction.DictVectorizer,
 ]:
     """Add features to the model"""
     df_train["PU_DO"] = df_train["PULocationID"] + "_" + df_train["DOLocationID"]
@@ -79,7 +78,7 @@ def train_best_model(
             "learning_rate": 0.09585355369315604,
             "max_depth": 30,
             "min_child_weight": 1.060597050922164,
-            "objective": "reg:linear",
+            "objective": "reg:squarederror",
             "reg_alpha": 0.018060244040060163,
             "reg_lambda": 0.011658731377413597,
             "seed": 42,
@@ -104,11 +103,13 @@ def train_best_model(
             pickle.dump(dv, f_out)
         mlflow.log_artifact("models/preprocessor.b", artifact_path="preprocessor")
 
-        mlflow.xgboost.log_model(booster, artifact_path="models_mlflow")
+        # Infer signature using raw input features (before DMatrix conversion)
+        signature = infer_signature(X_val.toarray(), y_val)
+        mlflow.xgboost.log_model(booster, artifact_path="models_mlflow", signature=signature)
     return None
 
 
-@flow
+@flow(name="main-flow")
 def main_flow(
     train_path: str = "./data/green_tripdata_2021-01.parquet",
     val_path: str = "./data/green_tripdata_2021-02.parquet",
@@ -135,4 +136,3 @@ if __name__ == "__main__":
     train_path: str = "./data/green_tripdata_2023-01.parquet"
     val_path: str = "./data/green_tripdata_2023-02.parquet"
     main_flow(train_path, val_path)
-
