@@ -8,14 +8,14 @@ variables:
   model_path: ./models
 
 # Pull section for code storage
-# pull:
-# - prefect.deployments.steps.git_clone:
-#     repository: https://github.com/your-repo/prefect-mlops.git
+pull:
+- prefect.deployments.steps.git_clone:
+    repository: https://github.com/joweyel/prefect-mlops-zoomcamp.git
 
 # Deployments section
 deployments:
 - name: taxi_local_data
-  version: 
+  version: 3.0
   tags: ["ml", "training"]
   description: Train model on local taxi data
   entrypoint: 3.4/orchestrate.py:main_flow
@@ -27,3 +27,18 @@ deployments:
 #   schedule:
 #     cron: "0 0 * * *"
 #     timezone: "America/New_York"
+
+- name: taxi_s3_data
+  version: 3.0
+  tags: ["ml", "training", "aws", "s3"]
+  description: Obtains data from s3 bucket and trains model with it
+  entrypoint: 3.5/orchestrate_s3.py:main_flow_s3
+  parameters:
+    train_path: ./data/green_tripdata_2023-01.parquet
+    val_path: ./data/green_tripdata_2023-02.parquet
+  work_pool:
+    name: zoompool
+  schedule:
+    cron: "0 0 * * *"
+    timezone: "America/New_York"
+  

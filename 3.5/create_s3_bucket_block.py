@@ -1,4 +1,5 @@
 import os
+import boto3
 from time import sleep
 from prefect_aws import S3Bucket, AwsCredentials
 from pydantic import SecretStr
@@ -8,6 +9,13 @@ from pydantic import SecretStr
 AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
 AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 
+
+def check_bucket(bucket_name: str, region: str = "us-east-1") -> None:
+    s3 = boto3.client(
+        "s3",
+        aws_access_key_id=AWS_ACCESS_KEY_ID, 
+        aws_secret_access_key=AWS_SECRET_ACCESS_KEY
+    )
 
 def create_aws_creds_block():
     my_aws_creds_obj = AwsCredentials(
